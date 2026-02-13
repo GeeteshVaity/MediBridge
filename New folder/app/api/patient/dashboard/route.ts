@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/mongodb';
 import Order from '@/models/Order';
 import Prescription from '@/models/Prescription';
+import Cart from '@/models/Cart';
+import Notification from '@/models/Notification';
 import mongoose from 'mongoose';
 
 export async function GET(request: NextRequest) {
@@ -26,33 +28,45 @@ export async function GET(request: NextRequest) {
     }
 
     // Get order stats
-    const [totalOrders, activeOrders, prescriptions, recentOrders] = await Promise.all([
+    const [totalOrders, activeOrders, prescriptionCount, completedOrders, cart, recentOrders, notifications] = await Promise.all([
       Order.countDocuments({ patientId }),
       Order.countDocuments({ patientId, status: { $in: ['pending', 'accepted'] } }),
       Prescription.countDocuments({ patientId }),
+      Order.countDocuments({ patientId, status: 'delivered' }),
+      Cart.findOne({ patientId }),
       Order.find({ patientId })
         .populate('acceptedBy', 'shopName')
         .sort({ createdAt: -1 })
         .limit(5),
+      Notification.find({ userId: patientId })
+        .sort({ createdAt: -1 })
+        .limit(5),
     ]);
+
+    const cartItemsCount = cart?.items?.length || 0;
 
     return NextResponse.json(
       {
-        stats: {
-          totalOrders,
-          activeOrders,
-          prescriptions,
-        },
+        activeOrders,
+        cartItems: cartItemsCount,
+        prescriptionCount,
+        completedOrders,
         recentOrders: recentOrders.map((order) => {
           const acceptedBy = order.acceptedBy as { shopName?: string } | null;
           return {
-            id: order._id,
+            _id: order._id,
             medicines: order.medicines,
             status: order.status,
-            shopName: acceptedBy?.shopName || null,
+            acceptedBy: { shopName: acceptedBy?.shopName || null },
             createdAt: order.createdAt,
           };
         }),
+        notifications: notifications.map((n) => ({
+          _id: n._id,
+          message: n.message,
+          read: n.read,
+          createdAt: n.createdAt,
+        })),
       },
       { status: 200 }
     );

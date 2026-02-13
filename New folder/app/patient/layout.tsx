@@ -11,7 +11,6 @@ import {
   ShoppingCart,
   ClipboardList,
   LogOut,
-  Bell,
   Menu,
   X,
 } from "lucide-react"
@@ -19,6 +18,8 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet"
+import { NotificationBell } from "@/components/notification-bell"
+import { useAuth } from "@/contexts/AuthContext"
 
 const navItems = [
   { href: "/patient", label: "Home", icon: Home },
@@ -82,6 +83,7 @@ function SidebarContent({ pathname, onNavigate }: { pathname: string; onNavigate
 export default function PatientLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const { user } = useAuth()
 
   return (
     <div className="flex h-screen bg-background">
@@ -111,14 +113,9 @@ export default function PatientLayout({ children }: { children: React.ReactNode 
             </h1>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" className="relative">
-              <Bell className="h-5 w-5 text-muted-foreground" />
-              <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-destructive" />
-              <span className="sr-only">Notifications</span>
-            </Button>
-            {/* TODO: Get user initials from auth context */}
+            <NotificationBell userId={user?.id} />
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-sm font-medium text-primary-foreground">
-              U
+              {user?.name?.charAt(0).toUpperCase() || 'U'}
             </div>
           </div>
         </header>

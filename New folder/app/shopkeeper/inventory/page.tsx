@@ -304,7 +304,7 @@ export default function InventoryPage() {
                     <TableCell className="text-muted-foreground">{m.category}</TableCell>
                     <TableCell className="text-right font-medium text-card-foreground">{m.quantity}</TableCell>
                     <TableCell>{stockBadge(m.quantity)}</TableCell>
-                    <TableCell className="text-right text-card-foreground">${m.price.toFixed(2)}</TableCell>
+                    <TableCell className="text-right text-card-foreground">₹{m.price.toFixed(2)}</TableCell>
                     <TableCell className="text-muted-foreground">{m.expiry}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Search, ShoppingCart, Plus, Check, Loader2, Pill } from "lucide-react"
+import { Search, ShoppingCart, Plus, Check, Loader2, Pill, Bell } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -26,6 +26,8 @@ export default function MedicinesPage() {
   const [error, setError] = useState<string | null>(null)
   const [search, setSearch] = useState("")
   const [addedIds, setAddedIds] = useState<Set<string>>(new Set())
+  const [requestingMedicine, setRequestingMedicine] = useState(false)
+  const [requestSent, setRequestSent] = useState(false)
 
   useEffect(() => {
     async function fetchMedicines() {
@@ -57,6 +59,7 @@ export default function MedicinesPage() {
   // Search function
   async function handleSearch(searchTerm: string) {
     setSearch(searchTerm)
+    setRequestSent(false) // Reset request state on new search
     if (searchTerm.length < 1) {
       // Fetch all
       try {
@@ -113,6 +116,46 @@ export default function MedicinesPage() {
     } catch (err) {
       console.error('Failed to add to cart:', err)
       alert(err instanceof Error ? err.message : 'Failed to add to cart')
+    }
+  }
+
+  async function handleRequestMedicine() {
+    if (!user?.id || !user?.name) {
+      alert('Please login first')
+      return
+    }
+    if (!search.trim()) {
+      alert('Please enter a medicine name to request')
+      return
+    }
+    setRequestingMedicine(true)
+    try {
+      const response = await fetch('/api/medicine-requests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          medicineName: search.trim(),
+          patientId: user.id,
+          patientName: user.name
+        })
+      })
+      const data = await response.json()
+      if (!response.ok) {
+        if (response.status === 409) {
+          alert('A request for this medicine is already pending. Stores have been notified!')
+          setRequestSent(true)
+        } else {
+          throw new Error(data.error || 'Failed to request medicine')
+        }
+      } else {
+        setRequestSent(true)
+        alert(`Your request for "${search}" has been sent to all stores!`)
+      }
+    } catch (err) {
+      console.error('Failed to request medicine:', err)
+      alert(err instanceof Error ? err.message : 'Failed to request medicine')
+    } finally {
+      setRequestingMedicine(false)
     }
   }
 
@@ -185,7 +228,7 @@ export default function MedicinesPage() {
                     <p className="text-sm text-muted-foreground">{m.brand}</p>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-lg font-bold text-primary">${m.price.toFixed(2)}</span>
+                    <span className="text-lg font-bold text-primary">₹{m.price.toFixed(2)}</span>
                     <Button
                       size="sm"
                       variant={added ? "secondary" : "default"}
@@ -212,9 +255,34 @@ export default function MedicinesPage() {
       )}
 
       {filtered.length === 0 && search && (
-        <div className="py-12 text-center">
-          <p className="text-muted-foreground">No medicines found matching your search.</p>
-        </div>
+        <Card className="border bg-card">
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <Pill className="h-12 w-12 text-muted-foreground mb-4" />
+            <p className="font-medium text-card-foreground">No medicines found for "{search}"</p>
+            <p className="text-sm text-muted-foreground mb-4">
+              Can't find what you're looking for? Request it and we'll notify all stores!
+            </p>
+            {requestSent ? (
+              <div className="flex items-center gap-2 text-accent">
+                <Check className="h-5 w-5" />
+                <span className="font-medium">Request sent to all stores!</span>
+              </div>
+            ) : (
+              <Button 
+                onClick={handleRequestMedicine} 
+                disabled={requestingMedicine}
+                className="gap-2"
+              >
+                {requestingMedicine ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Bell className="h-4 w-4" />
+                )}
+                {requestingMedicine ? 'Sending Request...' : `Request "${search}"`}
+              </Button>
+            )}
+          </CardContent>
+        </Card>
       )}
     </div>
   )

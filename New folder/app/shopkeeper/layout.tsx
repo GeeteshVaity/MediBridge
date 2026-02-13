@@ -12,18 +12,26 @@ import {
   LogOut,
   Menu,
   Store,
+  MapPin,
+  MessageSquare,
+  FileText,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet"
+import { NotificationBell } from "@/components/notification-bell"
+import { useAuth } from "@/contexts/AuthContext"
 
 const navItems = [
   { href: "/shopkeeper", label: "Home", icon: Home },
   { href: "/shopkeeper/inventory", label: "Inventory", icon: Package },
   { href: "/shopkeeper/orders", label: "Incoming Orders", icon: ClipboardList },
+  { href: "/shopkeeper/prescriptions", label: "Prescriptions", icon: FileText },
+  { href: "/shopkeeper/requests", label: "Medicine Requests", icon: MessageSquare },
   { href: "/shopkeeper/notifications", label: "Notifications", icon: Bell },
   { href: "/shopkeeper/restock", label: "Restock Requests", icon: RefreshCw },
+  { href: "/shopkeeper/location", label: "Shop Location", icon: MapPin },
 ]
 
 function SidebarContent({ pathname, onNavigate }: { pathname: string; onNavigate?: () => void }) {
@@ -79,6 +87,7 @@ function SidebarContent({ pathname, onNavigate }: { pathname: string; onNavigate
 export default function ShopkeeperLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const { user } = useAuth()
 
   return (
     <div className="flex h-screen bg-background">
@@ -106,14 +115,9 @@ export default function ShopkeeperLayout({ children }: { children: React.ReactNo
             </h1>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" className="relative">
-              <Bell className="h-5 w-5 text-muted-foreground" />
-              <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-destructive" />
-              <span className="sr-only">Notifications</span>
-            </Button>
-            {/* TODO: Get user initials from auth context */}
+            <NotificationBell userId={user?.id} />
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-accent text-sm font-medium text-accent-foreground">
-              S
+              {user?.name?.charAt(0).toUpperCase() || 'S'}
             </div>
           </div>
         </header>

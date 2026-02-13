@@ -8,6 +8,7 @@ export interface ICartItem {
   price?: number;
   brand?: string;
   inventoryId?: string;
+  toObject?: () => ICartItem;
 }
 
 export interface ICart extends Document {

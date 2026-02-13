@@ -8,7 +8,7 @@ import {
   AlertTriangle,
   TrendingUp,
   Bell,
-  DollarSign,
+  FileText,
   ShoppingBag,
   Loader2,
 } from "lucide-react"
@@ -27,10 +27,11 @@ interface Stat {
 interface RecentOrder {
   id: string
   patient: string
+  medicines: string
   items: number
   total: number
   status: string
-  time: string
+  date: string
 }
 
 interface LowStockAlert {
@@ -42,7 +43,7 @@ interface LowStockAlert {
 const defaultStats: Stat[] = [
   { label: "Pending Orders", value: "0", icon: ClipboardList, color: "text-primary" },
   { label: "Low Stock Items", value: "0", icon: AlertTriangle, color: "text-chart-4" },
-  { label: "Today's Revenue", value: "$0", icon: DollarSign, color: "text-accent" },
+  { label: "Prescriptions", value: "0", icon: FileText, color: "text-accent" },
   { label: "Total Products", value: "0", icon: Package, color: "text-primary" },
 ]
 
@@ -74,19 +75,23 @@ export default function ShopkeeperHome() {
         setStats([
           { label: "Pending Orders", value: data.pendingOrders?.toString() || "0", icon: ClipboardList, color: "text-primary" },
           { label: "Low Stock Items", value: data.lowStockCount?.toString() || "0", icon: AlertTriangle, color: "text-chart-4" },
-          { label: "Today's Revenue", value: `$${data.todayRevenue?.toFixed(2) || "0"}`, icon: DollarSign, color: "text-accent" },
+          { label: "Prescriptions", value: data.pendingPrescriptions?.toString() || "0", icon: FileText, color: "text-accent" },
           { label: "Total Products", value: data.totalProducts?.toString() || "0", icon: Package, color: "text-primary" },
         ])
         
         // Transform recent orders
-        const transformedOrders = (data.recentOrders || []).map((order: any) => ({
-          id: order._id?.slice(-6).toUpperCase() || 'N/A',
-          patient: order.patientId?.name || 'Unknown',
-          items: order.medicines?.length || 0,
-          total: order.medicines?.reduce((sum: number, m: any) => sum + (m.price || 0) * m.quantity, 0) || 0,
-          status: order.status === 'pending' ? 'New' : order.status === 'accepted' ? 'Accepted' : 'Delivered',
-          time: new Date(order.createdAt).toLocaleTimeString()
-        }))
+        const transformedOrders = (data.recentOrders || []).map((order: any) => {
+          const medicineNames = order.medicines?.map((m: any) => m.medicineName).join(', ') || 'No medicines'
+          return {
+            id: `ORD-${order._id?.slice(-6).toUpperCase()}` || 'N/A',
+            patient: order.patientId?.name || 'Unknown',
+            medicines: medicineNames,
+            items: order.medicines?.length || 0,
+            total: order.medicines?.reduce((sum: number, m: any) => sum + (m.price || 0) * m.quantity, 0) || 0,
+            status: order.status === 'pending' ? 'New' : order.status === 'accepted' ? 'Accepted' : 'Delivered',
+            date: order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A'
+          }
+        })
         setRecentOrders(transformedOrders)
         
         // Transform low stock items
@@ -165,11 +170,14 @@ export default function ShopkeeperHome() {
                           {order.status}
                         </Badge>
                       </div>
-                      <span className="text-sm text-muted-foreground">
-                        {order.patient} &middot; {order.items} items &middot; ${order.total.toFixed(2)}
+                      <span className="text-sm font-medium text-muted-foreground">
+                        {order.medicines}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {order.patient} &middot; {order.items} items &middot; ₹{order.total.toFixed(2)}
                       </span>
                     </div>
-                    <span className="text-sm text-muted-foreground">{order.time}</span>
+                    <span className="text-sm text-muted-foreground">{order.date}</span>
                   </div>
                 ))}
               </div>

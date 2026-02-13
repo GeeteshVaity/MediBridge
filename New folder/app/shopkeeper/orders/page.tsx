@@ -15,6 +15,7 @@ interface OrderItem {
 
 interface Order {
   id: string
+  orderId: string
   patient: string
   items: OrderItem[]
   total: number
@@ -63,6 +64,7 @@ export default function IncomingOrdersPage() {
       // Transform pending orders
       const pendingOrders = pendingData.orders.map((order: any) => ({
         id: order._id,
+        orderId: `ORD-${order._id.slice(-6).toUpperCase()}`,
         patient: order.patientId?.name || 'Unknown Patient',
         items: order.medicines.map((m: any) => ({
           name: m.medicineName,
@@ -78,6 +80,7 @@ export default function IncomingOrdersPage() {
       // Transform accepted/rejected orders
       const resolvedOrders = acceptedData.orders.map((order: any) => ({
         id: order._id,
+        orderId: `ORD-${order._id.slice(-6).toUpperCase()}`,
         patient: order.patientId?.name || 'Unknown Patient',
         items: order.medicines.map((m: any) => ({
           name: m.medicineName,
@@ -201,7 +204,7 @@ export default function IncomingOrdersPage() {
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-base font-semibold text-card-foreground">
-                      {order.id}
+                      {order.orderId}
                     </CardTitle>
                     <div className={`flex items-center gap-1 text-sm font-bold ${timerColor(order.timeLeft)}`}>
                       <Clock className="h-4 w-4" />
@@ -223,13 +226,13 @@ export default function IncomingOrdersPage() {
                           {item.name} x{item.qty}
                         </span>
                         <span className="text-card-foreground">
-                          ${(item.price * item.qty).toFixed(2)}
+                          ₹{(item.price * item.qty).toFixed(2)}
                         </span>
                       </div>
                     ))}
                     <div className="mt-2 flex justify-between border-t pt-2 text-sm font-semibold">
                       <span className="text-card-foreground">Total</span>
-                      <span className="text-primary">${order.total.toFixed(2)}</span>
+                      <span className="text-primary">₹{order.total.toFixed(2)}</span>
                     </div>
                   </div>
 
@@ -283,9 +286,12 @@ export default function IncomingOrdersPage() {
                       )}
                     </div>
                     <div>
-                      <p className="font-medium text-card-foreground">{order.id}</p>
+                      <p className="font-medium text-card-foreground">{order.orderId}</p>
                       <p className="text-sm text-muted-foreground">
-                        {order.patient} &middot; ${order.total.toFixed(2)}
+                        {order.items.map(i => i.name).join(', ')}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {order.patient} &middot; ₹{order.total.toFixed(2)} &middot; {order.date}
                       </p>
                     </div>
                   </div>

@@ -1,6 +1,11 @@
 import mongoose, { Document, Model, Schema } from 'mongoose';
 import bcrypt from 'bcryptjs';
 
+export interface ILocation {
+  type: 'Point';
+  coordinates: [number, number]; // [longitude, latitude]
+}
+
 export interface IUser extends Document {
   name: string;
   email: string;
@@ -8,6 +13,8 @@ export interface IUser extends Document {
   role: 'patient' | 'shop';
   shopName?: string;
   shopAddress?: string;
+  location?: ILocation;
+  phone?: string;
   createdAt: Date;
   updatedAt: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
@@ -46,11 +53,29 @@ const UserSchema = new Schema<IUser>(
       type: String,
       trim: true,
     },
+    location: {
+      type: {
+        type: String,
+        enum: ['Point'],
+        default: 'Point',
+      },
+      coordinates: {
+        type: [Number], // [longitude, latitude]
+        default: undefined,
+      },
+    },
+    phone: {
+      type: String,
+      trim: true,
+    },
   },
   {
     timestamps: true,
   }
 );
+
+// Create 2dsphere index for geospatial queries on shop locations
+UserSchema.index({ location: '2dsphere' });
 
 // Hash password before saving
 UserSchema.pre('save', async function () {

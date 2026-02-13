@@ -3,6 +3,8 @@ import { connectDB } from '@/lib/mongodb';
 import Order from '@/models/Order';
 import Inventory from '@/models/Inventory';
 import User from '@/models/User';
+import Prescription from '@/models/Prescription';
+import PrescriptionOffer from '@/models/PrescriptionOffer';
 import mongoose from 'mongoose';
 
 export async function GET(request: NextRequest) {
@@ -35,6 +37,8 @@ export async function GET(request: NextRequest) {
       lowStockCount,
       recentOrders,
       lowStockAlerts,
+      pendingPrescriptionsCount,
+      myOffersCount,
     ] = await Promise.all([
       User.findById(shopId).select('shopName shopAddress'),
       Order.countDocuments({ status: 'pending' }),
@@ -48,6 +52,8 @@ export async function GET(request: NextRequest) {
       Inventory.find({ shopId, quantity: { $lte: 10 } })
         .sort({ quantity: 1 })
         .limit(5),
+      Prescription.countDocuments({ status: { $in: ['pending', 'offers-received'] } }),
+      PrescriptionOffer.countDocuments({ shopId, status: 'pending' }),
     ]);
 
     if (!shop) {
@@ -61,23 +67,23 @@ export async function GET(request: NextRequest) {
       {
         shopName: shop.shopName,
         shopAddress: shop.shopAddress,
-        stats: {
-          pendingOrders: pendingOrdersCount,
-          acceptedOrders: acceptedOrdersCount,
-          totalInventory,
-          lowStockCount,
-        },
+        pendingOrders: pendingOrdersCount,
+        totalProducts: totalInventory,
+        lowStockCount,
+        pendingPrescriptions: pendingPrescriptionsCount,
+        myPendingOffers: myOffersCount,
         recentOrders: recentOrders.map((order) => {
           const patient = order.patientId as { name?: string } | null;
           return {
-            id: order._id,
-            patientName: patient?.name || 'Unknown',
+            _id: order._id,
+            patientId: { name: patient?.name || 'Unknown' },
             medicines: order.medicines,
             status: order.status,
+            createdAt: order.createdAt,
             updatedAt: order.updatedAt,
           };
         }),
-        lowStockAlerts: lowStockAlerts.map((item) => ({
+        lowStockItems: lowStockAlerts.map((item) => ({
           id: item._id,
           medicineName: item.medicineName,
           quantity: item.quantity,

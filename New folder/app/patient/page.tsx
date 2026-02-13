@@ -91,7 +91,7 @@ export default function PatientHome() {
         // Transform recent orders
         const transformedOrders = (data.recentOrders || []).map((order: any) => ({
           id: `ORD-${order._id.slice(-6).toUpperCase()}`,
-          store: order.acceptedBy?.name || 'Pending',
+          store: order.acceptedBy?.shopName || 'Pending',
           status: getDisplayStatus(order.status),
           items: order.medicines?.length || 0,
           date: new Date(order.createdAt).toLocaleDateString()

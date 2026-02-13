@@ -196,7 +196,7 @@ export default function CartPage() {
                   <div className="flex-1">
                     <h3 className="font-semibold text-card-foreground">{item.name}</h3>
                     <p className="text-sm text-muted-foreground">{item.brand}</p>
-                    <p className="mt-1 font-medium text-primary">${item.price.toFixed(2)} each</p>
+                    <p className="mt-1 font-medium text-primary">₹{item.price.toFixed(2)} each</p>
                   </div>
                   <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2">
@@ -246,16 +246,16 @@ export default function CartPage() {
           <CardContent className="flex flex-col gap-3">
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Subtotal</span>
-              <span className="text-card-foreground">${subtotal.toFixed(2)}</span>
+              <span className="text-card-foreground">₹{subtotal.toFixed(2)}</span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Delivery Fee</span>
-              <span className="text-card-foreground">${deliveryFee.toFixed(2)}</span>
+              <span className="text-card-foreground">₹{deliveryFee.toFixed(2)}</span>
             </div>
             <Separator />
             <div className="flex justify-between font-semibold">
               <span className="text-card-foreground">Total</span>
-              <span className="text-primary">${total.toFixed(2)}</span>
+              <span className="text-primary">₹{total.toFixed(2)}</span>
             </div>
             <Button className="mt-2 w-full" size="lg" disabled={items.length === 0 || checkingOut} onClick={handleCheckout}>
               {checkingOut ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}

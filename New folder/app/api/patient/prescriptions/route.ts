@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/mongodb';
 import Prescription from '@/models/Prescription';
+import Notification from '@/models/Notification';
+import User from '@/models/User';
+import PrescriptionOffer from '@/models/PrescriptionOffer';
 import mongoose from 'mongoose';
 
 export async function POST(request: NextRequest) {
@@ -8,11 +11,11 @@ export async function POST(request: NextRequest) {
     await connectDB();
 
     const body = await request.json();
-    const { patientId, imageUrl, notes } = body;
+    const { patientId, patientName, imageUrl, imageData, notes } = body;
 
-    if (!patientId || !imageUrl) {
+    if (!patientId || !imageUrl || !patientName) {
       return NextResponse.json(
-        { error: 'patientId and imageUrl are required' },
+        { error: 'patientId, patientName and imageUrl are required' },
         { status: 400 }
       );
     }
@@ -26,21 +29,42 @@ export async function POST(request: NextRequest) {
 
     const prescription = await Prescription.create({
       patientId,
+      patientName,
       imageUrl,
+      ...(imageData && { imageData }),
       ...(notes && { notes: notes.trim() }),
+      status: 'pending',
     });
+
+    // Notify all shopkeepers about the new prescription
+    const shopkeepers = await User.find({ role: 'shop' }).select('_id');
+    
+    const notifications = shopkeepers.map((shop) => ({
+      userId: shop._id,
+      type: 'order',
+      title: 'New Prescription Uploaded',
+      message: `${patientName} has uploaded a prescription. Review and send your medicine offer.`,
+      read: false,
+    }));
+
+    if (notifications.length > 0) {
+      await Notification.insertMany(notifications);
+    }
 
     return NextResponse.json(
       {
-        message: 'Prescription uploaded successfully',
+        message: 'Prescription uploaded and sent to all medical shops',
         prescription: {
           id: prescription._id,
+          _id: prescription._id,
           patientId: prescription.patientId,
+          patientName: prescription.patientName,
           imageUrl: prescription.imageUrl,
           notes: prescription.notes,
           status: prescription.status,
           createdAt: prescription.createdAt,
         },
+        notifiedShops: shopkeepers.length,
       },
       { status: 201 }
     );
@@ -76,9 +100,27 @@ export async function GET(request: NextRequest) {
 
     const prescriptions = await Prescription.find({ patientId }).sort({ createdAt: -1 });
 
+    // Get offers count for each prescription
+    const prescriptionsWithOffers = await Promise.all(
+      prescriptions.map(async (prescription) => {
+        const offersCount = await PrescriptionOffer.countDocuments({ 
+          prescriptionId: prescription._id 
+        });
+        const offers = await PrescriptionOffer.find({ 
+          prescriptionId: prescription._id 
+        }).sort({ totalAmount: 1 });
+        
+        return {
+          ...prescription.toObject(),
+          offersCount,
+          offers,
+        };
+      })
+    );
+
     return NextResponse.json(
       {
-        prescriptions,
+        prescriptions: prescriptionsWithOffers,
         count: prescriptions.length,
       },
       { status: 200 }

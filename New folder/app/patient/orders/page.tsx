@@ -100,7 +100,7 @@ export default function OrdersPage() {
         const data = await response.json()
         const transformedOrders = data.orders.map((order: any) => ({
           id: `ORD-${order._id.slice(-6).toUpperCase()}`,
-          store: order.acceptedBy?.name || 'Pending Assignment',
+          store: order.acceptedBy?.shopName || 'Pending Assignment',
           date: new Date(order.createdAt).toLocaleDateString(),
           status: getDisplayStatus(order.status),
           progress: getProgress(order.status),
@@ -201,14 +201,14 @@ export default function OrdersPage() {
                           {item.name} x{item.qty}
                         </span>
                         <span className="text-card-foreground">
-                          ${(item.price * item.qty).toFixed(2)}
+                          ₹{(item.price * item.qty).toFixed(2)}
                         </span>
                       </div>
                     ))}
                   </div>
                   <div className="mt-2 flex justify-between border-t pt-2 text-sm font-semibold">
                     <span className="text-card-foreground">Total</span>
-                    <span className="text-primary">${order.total.toFixed(2)}</span>
+                    <span className="text-primary">₹{order.total.toFixed(2)}</span>
                   </div>
                 </div>
               </CardContent>

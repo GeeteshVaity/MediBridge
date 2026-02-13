@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/mongodb';
 import Cart from '@/models/Cart';
+import Inventory from '@/models/Inventory';
 import mongoose from 'mongoose';
 
 // Get cart
@@ -31,11 +32,42 @@ export async function GET(request: NextRequest) {
       cart = await Cart.create({ patientId, items: [] });
     }
 
+    // Fetch current prices from inventory for all items
+    const itemsWithPrices = await Promise.all(
+      cart.items.map(async (item) => {
+        const itemObj = item.toObject ? item.toObject() : item;
+        
+        // Try to fetch current price from inventory
+        if (itemObj.inventoryId && mongoose.Types.ObjectId.isValid(itemObj.inventoryId)) {
+          const inventory = await Inventory.findById(itemObj.inventoryId);
+          if (inventory) {
+            return {
+              ...itemObj,
+              price: inventory.price || itemObj.price || 0,
+              brand: inventory.brand || itemObj.brand || 'Generic',
+            };
+          }
+        }
+        
+        // Fallback: search by medicine name
+        const inventory = await Inventory.findOne({ medicineName: itemObj.medicineName });
+        if (inventory) {
+          return {
+            ...itemObj,
+            price: inventory.price || itemObj.price || 0,
+            brand: inventory.brand || itemObj.brand || 'Generic',
+          };
+        }
+        
+        return itemObj;
+      })
+    );
+
     return NextResponse.json(
       {
         cart: {
           id: cart._id,
-          items: cart.items,
+          items: itemsWithPrices,
           itemCount: cart.items.length,
         },
       },
@@ -92,8 +124,18 @@ export async function POST(request: NextRequest) {
     );
 
     if (existingItemIndex > -1) {
-      // Update existing item quantity
+      // Update existing item quantity and price
       cart.items[existingItemIndex].quantity += quantity;
+      // Update price if provided (in case price changed)
+      if (price !== undefined) {
+        cart.items[existingItemIndex].price = price;
+      }
+      if (brand) {
+        cart.items[existingItemIndex].brand = brand;
+      }
+      if (inventoryId) {
+        cart.items[existingItemIndex].inventoryId = inventoryId;
+      }
     } else {
       // Add new item
       cart.items.push({

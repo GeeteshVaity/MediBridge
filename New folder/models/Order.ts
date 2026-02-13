@@ -2,6 +2,7 @@ import mongoose, { Document, Model, Schema, Types } from 'mongoose';
 
 export interface IMedicine {
   medicineName: string;
+  brand?: string;
   quantity: number;
   price?: number;
 }
@@ -11,6 +12,7 @@ export interface IOrder extends Document {
   medicines: IMedicine[];
   status: 'pending' | 'accepted' | 'delivered';
   acceptedBy?: Types.ObjectId;
+  prescriptionId?: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -27,6 +29,9 @@ const OrderSchema = new Schema<IOrder>(
         medicineName: {
           type: String,
           required: [true, 'Medicine name is required'],
+        },
+        brand: {
+          type: String,
         },
         quantity: {
           type: Number,
@@ -47,6 +52,10 @@ const OrderSchema = new Schema<IOrder>(
     acceptedBy: {
       type: Schema.Types.ObjectId,
       ref: 'User',
+    },
+    prescriptionId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Prescription',
     },
   },
   {
