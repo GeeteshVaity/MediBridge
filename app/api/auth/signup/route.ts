@@ -43,13 +43,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Map 'shopkeeper' role to 'shop' for database storage
+    const dbRole = role === 'shopkeeper' ? 'shop' : role;
+
     // Create new user
     const userData: any = {
       name,
       email: email.toLowerCase(),
       phone,
       password,
-      role,
+      role: dbRole,
     };
 
     if (role === 'shopkeeper') {

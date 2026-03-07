@@ -57,11 +57,9 @@ const UserSchema = new Schema<IUser>(
       type: {
         type: String,
         enum: ['Point'],
-        default: 'Point',
       },
       coordinates: {
         type: [Number], // [longitude, latitude]
-        default: undefined,
       },
     },
     phone: {
@@ -75,7 +73,8 @@ const UserSchema = new Schema<IUser>(
 );
 
 // Create 2dsphere index for geospatial queries on shop locations
-UserSchema.index({ location: '2dsphere' });
+// Using sparse:true so it only indexes documents with valid location data
+UserSchema.index({ location: '2dsphere' }, { sparse: true });
 
 // Hash password before saving
 UserSchema.pre('save', async function () {
