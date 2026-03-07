@@ -2,11 +2,12 @@ import mongoose, { Document, Model, Schema, Types } from 'mongoose';
 
 export interface INotification extends Document {
   userId: Types.ObjectId;
-  type: 'order' | 'stock' | 'system' | 'restock' | 'medicine-request';
+  type: 'order' | 'stock' | 'system' | 'restock' | 'medicine-request' | 'prescription';
   title: string;
   message: string;
   read: boolean;
   relatedRequestId?: Types.ObjectId;
+  relatedPrescriptionId?: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -20,7 +21,7 @@ const NotificationSchema = new Schema<INotification>(
     },
     type: {
       type: String,
-      enum: ['order', 'stock', 'system', 'restock', 'medicine-request'],
+      enum: ['order', 'stock', 'system', 'restock', 'medicine-request', 'prescription'],
       required: [true, 'Notification type is required'],
     },
     title: {
@@ -40,6 +41,10 @@ const NotificationSchema = new Schema<INotification>(
     relatedRequestId: {
       type: Schema.Types.ObjectId,
       ref: 'MedicineRequest',
+    },
+    relatedPrescriptionId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Prescription',
     },
   },
   {

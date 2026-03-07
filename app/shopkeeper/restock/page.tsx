@@ -194,7 +194,7 @@ export default function RestockPage() {
 
       <div className="grid gap-6 lg:grid-cols-2">
         {/* New Request Form */}
-        <Card className="border bg-card">
+        <Card className="card-elevated">
           <CardHeader>
             <CardTitle className="text-lg font-semibold text-card-foreground">New Restock Request</CardTitle>
             <CardDescription>Fill in the details to request a restock.</CardDescription>
@@ -271,7 +271,7 @@ export default function RestockPage() {
         </Card>
 
         {/* Low Stock Suggestions */}
-        <Card className="border bg-card">
+        <Card className="card-elevated">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg font-semibold text-card-foreground">
               <RefreshCw className="h-4 w-4 text-primary" />
@@ -308,7 +308,7 @@ export default function RestockPage() {
       </div>
 
       {/* Restock History */}
-      <Card className="border bg-card">
+      <Card className="card-elevated">
         <CardHeader>
           <CardTitle className="text-lg font-semibold text-card-foreground">Restock History</CardTitle>
         </CardHeader>
@@ -345,3 +345,5 @@ export default function RestockPage() {
     </div>
   )
 }
+
+

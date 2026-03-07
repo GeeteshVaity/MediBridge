@@ -32,36 +32,48 @@ export async function GET(request: NextRequest) {
       cart = await Cart.create({ patientId, items: [] });
     }
 
-    // Fetch current prices from inventory for all items
-    const itemsWithPrices = await Promise.all(
-      cart.items.map(async (item) => {
-        const itemObj = item.toObject ? item.toObject() : item;
-        
-        // Try to fetch current price from inventory
-        if (itemObj.inventoryId && mongoose.Types.ObjectId.isValid(itemObj.inventoryId)) {
-          const inventory = await Inventory.findById(itemObj.inventoryId);
-          if (inventory) {
-            return {
-              ...itemObj,
-              price: inventory.price || itemObj.price || 0,
-              brand: inventory.brand || itemObj.brand || 'Generic',
-            };
-          }
-        }
-        
-        // Fallback: search by medicine name
-        const inventory = await Inventory.findOne({ medicineName: itemObj.medicineName });
-        if (inventory) {
-          return {
-            ...itemObj,
-            price: inventory.price || itemObj.price || 0,
-            brand: inventory.brand || itemObj.brand || 'Generic',
-          };
-        }
-        
-        return itemObj;
-      })
+    // Batch fetch inventory items to avoid N+1 queries
+    const inventoryIds = cart.items
+      .map((item) => item.inventoryId)
+      .filter((id): id is string => !!id && mongoose.Types.ObjectId.isValid(id));
+    
+    const medicineNames = cart.items.map((item) => item.medicineName);
+
+    // Fetch all relevant inventory items in one query
+    const inventoryItems = await Inventory.find({
+      $or: [
+        { _id: { $in: inventoryIds.map(id => new mongoose.Types.ObjectId(id)) } },
+        { medicineName: { $in: medicineNames } }
+      ]
+    }).lean();
+
+    // Create lookup maps for fast access
+    const inventoryByIdMap = new Map(
+      inventoryItems.map((inv: any) => [inv._id.toString(), inv])
     );
+    const inventoryByNameMap = new Map(
+      inventoryItems.map((inv: any) => [inv.medicineName, inv])
+    );
+
+    // Map items with inventory data
+    const itemsWithPrices = cart.items.map((item) => {
+      const itemObj = item.toObject ? item.toObject() : item;
+      
+      // Try by inventoryId first, then by name
+      const inventory = 
+        (itemObj.inventoryId && inventoryByIdMap.get(itemObj.inventoryId)) ||
+        inventoryByNameMap.get(itemObj.medicineName);
+
+      if (inventory) {
+        return {
+          ...itemObj,
+          price: inventory.price || itemObj.price || 0,
+          brand: inventory.brand || itemObj.brand || 'Generic',
+        };
+      }
+      
+      return itemObj;
+    });
 
     return NextResponse.json(
       {

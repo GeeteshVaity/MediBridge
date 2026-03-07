@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Bell, Check, Loader2, Package, AlertTriangle, MessageSquare, RefreshCw, Info } from "lucide-react"
+import { Bell, Check, Loader2, Package, AlertTriangle, MessageSquare, RefreshCw, Info, FileText } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -35,6 +35,8 @@ function getNotificationIcon(type: string) {
       return <MessageSquare className="h-4 w-4 text-accent" />
     case 'restock':
       return <RefreshCw className="h-4 w-4 text-primary" />
+    case 'prescription':
+      return <FileText className="h-4 w-4 text-primary" />
     default:
       return <Info className="h-4 w-4 text-muted-foreground" />
   }

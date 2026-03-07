@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Bell, CheckCheck, ShoppingBag, AlertTriangle, Package, Info, Loader2 } from "lucide-react"
+import { Bell, CheckCheck, ShoppingBag, AlertTriangle, Package, Info, Loader2, FileText } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -9,7 +9,7 @@ import { useAuth } from "@/contexts/AuthContext"
 
 interface Notification {
   id: string
-  type: "order" | "stock" | "system" | "restock"
+  type: "order" | "stock" | "system" | "restock" | "prescription"
   title: string
   message: string
   time: string
@@ -24,6 +24,8 @@ function typeIcon(type: string) {
       return <AlertTriangle className="h-5 w-5 text-chart-4" />
     case "restock":
       return <Package className="h-5 w-5 text-accent" />
+    case "prescription":
+      return <FileText className="h-5 w-5 text-primary" />
     default:
       return <Info className="h-5 w-5 text-muted-foreground" />
   }
@@ -128,7 +130,7 @@ export default function NotificationsPage() {
       </div>
 
       {notifications.length === 0 ? (
-        <Card className="border bg-card">
+        <Card className="card-elevated">
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Bell className="h-12 w-12 text-muted-foreground mb-4" />
             <p className="font-medium text-card-foreground">No notifications</p>
@@ -140,7 +142,7 @@ export default function NotificationsPage() {
           {notifications.map((n) => (
             <Card
               key={n.id}
-              className={`border bg-card transition-colors ${!n.read ? "border-primary/20 bg-primary/[0.02]" : ""}`}
+              className={`card-elevated transition-colors ${!n.read ? "border-primary/20 bg-primary/[0.02]" : ""}`}
             >
               <CardContent className="flex items-start gap-4 p-5">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted">
@@ -168,3 +170,5 @@ export default function NotificationsPage() {
     </div>
   )
 }
+
+

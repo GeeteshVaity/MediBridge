@@ -4,7 +4,7 @@ import Prescription from '@/models/Prescription';
 import PrescriptionOffer from '@/models/PrescriptionOffer';
 import mongoose from 'mongoose';
 
-// GET - Fetch all pending prescriptions for shops to review
+// GET - Fetch all prescriptions for shops to review (including their submitted offers)
 export async function GET(request: NextRequest) {
   try {
     await connectDB();
@@ -26,22 +26,29 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Get all prescriptions that are pending or have offers
+    // Get all offers submitted by this shop
+    const shopOffers = await PrescriptionOffer.find({ shopId });
+    const offeredPrescriptionIds = shopOffers.map((o) => o.prescriptionId);
+
+    // Get prescriptions that are:
+    // 1. Pending/offers-received (available for new offers), OR
+    // 2. Already have an offer from this shop (to show offer status)
     const prescriptions = await Prescription.find({
-      status: { $in: ['pending', 'offers-received'] }
+      $or: [
+        { status: { $in: ['pending', 'offers-received'] } },
+        { _id: { $in: offeredPrescriptionIds } }
+      ]
     })
       .populate('patientId', 'name email')
       .sort({ createdAt: -1 });
 
-    // Check which ones this shop has already sent offers for
-    const shopOffers = await PrescriptionOffer.find({ shopId });
-    const offeredPrescriptionIds = new Set(
+    const offeredPrescriptionIdsSet = new Set(
       shopOffers.map((o) => o.prescriptionId.toString())
     );
 
     const prescriptionsWithStatus = prescriptions.map((p) => ({
       ...p.toObject(),
-      hasSubmittedOffer: offeredPrescriptionIds.has(p._id.toString()),
+      hasSubmittedOffer: offeredPrescriptionIdsSet.has(p._id.toString()),
       myOffer: shopOffers.find(
         (o) => o.prescriptionId.toString() === p._id.toString()
       ),

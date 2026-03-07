@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { FileText, Loader2, Plus, Trash2, Send, IndianRupee, ChevronDown, ChevronUp, Check, Clock, User } from "lucide-react"
+import { FileText, Loader2, Plus, Trash2, Send, IndianRupee, ChevronDown, ChevronUp, Check, Clock, User, X, CheckCircle2, XCircle } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -198,7 +198,9 @@ export default function ShopkeeperPrescriptionsPage() {
   }
 
   const pendingPrescriptions = prescriptions.filter(p => !p.hasSubmittedOffer && p.status !== 'accepted')
-  const submittedPrescriptions = prescriptions.filter(p => p.hasSubmittedOffer)
+  const submittedPrescriptions = prescriptions.filter(p => p.hasSubmittedOffer && p.myOffer?.status === 'pending')
+  const acceptedPrescriptions = prescriptions.filter(p => p.hasSubmittedOffer && p.myOffer?.status === 'accepted')
+  const rejectedPrescriptions = prescriptions.filter(p => p.hasSubmittedOffer && p.myOffer?.status === 'rejected')
 
   return (
     <div className="flex flex-col gap-6">
@@ -220,7 +222,7 @@ export default function ShopkeeperPrescriptionsPage() {
         </h3>
 
         {pendingPrescriptions.length === 0 ? (
-          <Card className="border bg-card">
+          <Card className="card-elevated">
             <CardContent className="flex flex-col items-center justify-center py-12">
               <FileText className="h-12 w-12 text-muted-foreground mb-4" />
               <p className="font-medium text-card-foreground">No pending prescriptions</p>
@@ -230,7 +232,7 @@ export default function ShopkeeperPrescriptionsPage() {
         ) : (
           <div className="flex flex-col gap-4">
             {pendingPrescriptions.map((prescription) => (
-              <Card key={prescription._id} className="border bg-card">
+              <Card key={prescription._id} className="card-elevated">
                 <CardContent className="p-0">
                   {/* Prescription Header */}
                   <div 
@@ -431,12 +433,13 @@ export default function ShopkeeperPrescriptionsPage() {
       {submittedPrescriptions.length > 0 && (
         <div>
           <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-            <Check className="h-5 w-5 text-accent" />
-            Offers Submitted
+            <Clock className="h-5 w-5 text-primary" />
+            Awaiting Patient Response
+            <Badge className="bg-primary/10 text-primary">{submittedPrescriptions.length}</Badge>
           </h3>
           <div className="flex flex-col gap-4">
             {submittedPrescriptions.map((prescription) => (
-              <Card key={prescription._id} className="border bg-card">
+              <Card key={prescription._id} className="card-elevated">
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
@@ -452,19 +455,7 @@ export default function ShopkeeperPrescriptionsPage() {
                           <p className="font-medium text-card-foreground">
                             RX-{prescription._id.slice(-6).toUpperCase()}
                           </p>
-                          <Badge className={
-                            prescription.myOffer?.status === 'accepted' 
-                              ? "bg-accent/10 text-accent"
-                              : prescription.myOffer?.status === 'rejected'
-                              ? "bg-destructive/10 text-destructive"
-                              : "bg-primary/10 text-primary"
-                          }>
-                            {prescription.myOffer?.status === 'accepted' 
-                              ? 'Accepted' 
-                              : prescription.myOffer?.status === 'rejected'
-                              ? 'Rejected'
-                              : 'Pending'}
-                          </Badge>
+                          <Badge className="bg-primary/10 text-primary">Pending</Badge>
                         </div>
                         <div className="flex items-center gap-1 text-sm text-muted-foreground">
                           <User className="h-3 w-3" />
@@ -484,6 +475,114 @@ export default function ShopkeeperPrescriptionsPage() {
           </div>
         </div>
       )}
+
+      {/* Accepted Offers */}
+      {acceptedPrescriptions.length > 0 && (
+        <div>
+          <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+            <CheckCircle2 className="h-5 w-5 text-accent" />
+            Accepted Offers
+            <Badge className="bg-accent/10 text-accent">{acceptedPrescriptions.length}</Badge>
+          </h3>
+          <div className="flex flex-col gap-4">
+            {acceptedPrescriptions.map((prescription) => (
+              <Card key={prescription._id} className="border-accent/30 border bg-accent/5">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      {prescription.imageData && (
+                        <img 
+                          src={prescription.imageData} 
+                          alt="Prescription" 
+                          className="h-16 w-16 object-cover rounded-lg border"
+                        />
+                      )}
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium text-card-foreground">
+                            RX-{prescription._id.slice(-6).toUpperCase()}
+                          </p>
+                          <Badge className="bg-accent/10 text-accent">
+                            <Check className="h-3 w-3 mr-1" />
+                            Accepted
+                          </Badge>
+                        </div>
+                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                          <User className="h-3 w-3" />
+                          <span>{prescription.patientName}</span>
+                        </div>
+                        {prescription.myOffer && (
+                          <p className="text-sm font-medium text-accent mt-1">
+                            Order total: ₹{(prescription.myOffer.totalAmount + prescription.myOffer.deliveryFee).toFixed(2)}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm text-muted-foreground">Please prepare the order</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Rejected Offers */}
+      {rejectedPrescriptions.length > 0 && (
+        <div>
+          <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+            <XCircle className="h-5 w-5 text-muted-foreground" />
+            Not Selected
+            <Badge variant="secondary">{rejectedPrescriptions.length}</Badge>
+          </h3>
+          <div className="flex flex-col gap-4">
+            {rejectedPrescriptions.map((prescription) => (
+              <Card key={prescription._id} className="border bg-muted/30">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      {prescription.imageData && (
+                        <img 
+                          src={prescription.imageData} 
+                          alt="Prescription" 
+                          className="h-16 w-16 object-cover rounded-lg border opacity-60"
+                        />
+                      )}
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium text-muted-foreground">
+                            RX-{prescription._id.slice(-6).toUpperCase()}
+                          </p>
+                          <Badge variant="secondary" className="text-muted-foreground">
+                            <X className="h-3 w-3 mr-1" />
+                            Not Selected
+                          </Badge>
+                        </div>
+                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                          <User className="h-3 w-3" />
+                          <span>{prescription.patientName}</span>
+                        </div>
+                        {prescription.myOffer && (
+                          <p className="text-sm text-muted-foreground mt-1">
+                            Your offer was: ₹{(prescription.myOffer.totalAmount + prescription.myOffer.deliveryFee).toFixed(2)}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs text-muted-foreground">Patient chose another offer</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
+
+

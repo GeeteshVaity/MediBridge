@@ -152,7 +152,7 @@ export default function MedicineRequestsPage() {
 
         <TabsContent value="pending" className="mt-6">
           {requests.length === 0 ? (
-            <Card className="border bg-card">
+            <Card className="card-elevated">
               <CardContent className="flex flex-col items-center justify-center py-12">
                 <MessageSquare className="h-12 w-12 text-muted-foreground mb-4" />
                 <p className="font-medium text-card-foreground">No pending requests</p>
@@ -166,7 +166,7 @@ export default function MedicineRequestsPage() {
               {requests.map((request) => {
                 const isFulfilling = fulfillingIds.has(request.id)
                 return (
-                  <Card key={request.id} className="border bg-card">
+                  <Card key={request.id} className="card-elevated">
                     <CardContent className="p-5">
                       <div className="flex flex-col gap-4">
                         <div className="flex items-start justify-between">
@@ -214,7 +214,7 @@ export default function MedicineRequestsPage() {
 
         <TabsContent value="fulfilled" className="mt-6">
           {fulfilledRequests.length === 0 ? (
-            <Card className="border bg-card">
+            <Card className="card-elevated">
               <CardContent className="flex flex-col items-center justify-center py-12">
                 <Check className="h-12 w-12 text-muted-foreground mb-4" />
                 <p className="font-medium text-card-foreground">No fulfilled requests yet</p>
@@ -226,7 +226,7 @@ export default function MedicineRequestsPage() {
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {fulfilledRequests.map((request) => (
-                <Card key={request.id} className="border bg-card">
+                <Card key={request.id} className="card-elevated">
                   <CardContent className="p-5">
                     <div className="flex flex-col gap-3">
                       <div className="flex items-center gap-3">
@@ -264,3 +264,5 @@ export default function MedicineRequestsPage() {
     </div>
   )
 }
+
+

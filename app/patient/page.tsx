@@ -40,16 +40,18 @@ interface Notification {
 }
 
 const defaultStats: Stat[] = [
-  { label: "Active Orders", value: "0", icon: ClipboardList, color: "text-primary" },
-  { label: "Cart Items", value: "0", icon: ShoppingCart, color: "text-accent" },
-  { label: "Prescriptions", value: "0", icon: Upload, color: "text-chart-1" },
-  { label: "Completed", value: "0", icon: CheckCircle2, color: "text-accent" },
+  { label: "Active Orders", value: "0", icon: ClipboardList, color: "text-blue-500" },
+  { label: "Cart Items", value: "0", icon: ShoppingCart, color: "text-orange-500" },
+  { label: "Prescriptions", value: "0", icon: Upload, color: "text-purple-500" },
+  { label: "Completed", value: "0", icon: CheckCircle2, color: "text-green-500" },
 ]
 
 function statusColor(status: string) {
-  if (status === "Delivered" || status === "delivered") return "bg-accent/10 text-accent"
-  if (status === "In Transit" || status === "accepted") return "bg-primary/10 text-primary"
-  return "bg-muted text-muted-foreground"
+  if (status === "Delivered" || status === "delivered") return "status-delivered font-bold"
+  if (status === "In Transit" || status === "accepted") return "status-accepted font-bold"
+  if (status === "Pending" || status === "pending") return "status-pending font-bold"
+  if (status === "Rejected" || status === "rejected" || status === "Cancelled" || status === "cancelled") return "status-rejected font-bold"
+  return "bg-slate-100 text-slate-600 font-semibold"
 }
 
 function getDisplayStatus(status: string): string {
@@ -82,10 +84,10 @@ export default function PatientHome() {
         const data = await response.json()
         
         setStats([
-          { label: "Active Orders", value: data.activeOrders?.toString() || "0", icon: ClipboardList, color: "text-primary" },
-          { label: "Cart Items", value: data.cartItems?.toString() || "0", icon: ShoppingCart, color: "text-accent" },
-          { label: "Prescriptions", value: data.prescriptionCount?.toString() || "0", icon: Upload, color: "text-chart-1" },
-          { label: "Completed", value: data.completedOrders?.toString() || "0", icon: CheckCircle2, color: "text-accent" },
+          { label: "Active Orders", value: data.activeOrders?.toString() || "0", icon: ClipboardList, color: "text-blue-500" },
+          { label: "Cart Items", value: data.cartItems?.toString() || "0", icon: ShoppingCart, color: "text-orange-500" },
+          { label: "Prescriptions", value: data.prescriptionCount?.toString() || "0", icon: Upload, color: "text-purple-500" },
+          { label: "Completed", value: data.completedOrders?.toString() || "0", icon: CheckCircle2, color: "text-green-500" },
         ])
         
         // Transform recent orders
@@ -126,24 +128,24 @@ export default function PatientHome() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h2 className="text-2xl font-bold text-foreground">
-          {userName ? `Welcome back, ${userName}` : "Welcome to MediBridge"}
+      <div className="bg-gradient-to-r from-sky-100 via-cyan-50 to-transparent p-5 rounded-xl border-l-4 border-sky-400 shadow-sm">
+        <h2 className="text-2xl font-extrabold text-slate-800">
+          {userName ? <>Welcome back, <span className="text-sky-500">{userName}</span></> : "Welcome to MediBridge"}
         </h2>
-        <p className="text-muted-foreground">{"Here's what's happening with your health today."}</p>
+        <p className="text-slate-600 font-medium">{"Here's what's happening with your health today."}</p>
       </div>
 
       {/* Stats */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {stats.map((s) => (
-          <Card key={s.label} className="border bg-card">
+        {stats.map((s, index) => (
+          <Card key={s.label} className="card-elevated hover:shadow-lg hover:shadow-sky-100/50 transition-all hover:-translate-y-1">
             <CardContent className="flex items-center gap-4 p-5">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-muted">
-                <s.icon className={`h-5 w-5 ${s.color}`} />
+              <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${index === 0 ? 'bg-sky-100' : index === 1 ? 'bg-amber-100' : index === 2 ? 'bg-violet-100' : 'bg-emerald-100'}`}>
+                <s.icon className={`h-6 w-6 ${s.color}`} />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">{s.label}</p>
-                <p className="text-2xl font-bold text-card-foreground">{s.value}</p>
+                <p className="text-sm font-medium text-slate-500">{s.label}</p>
+                <p className="text-3xl font-extrabold text-slate-800">{s.value}</p>
               </div>
             </CardContent>
           </Card>
@@ -152,35 +154,39 @@ export default function PatientHome() {
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Recent Orders */}
-        <Card className="border bg-card lg:col-span-2">
+        <Card className="card-elevated lg:col-span-2">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-lg font-semibold text-card-foreground">Recent Orders</CardTitle>
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/patient/orders">View All</Link>
+            <CardTitle className="text-lg font-bold text-slate-800 flex items-center gap-2">
+              <ClipboardList className="h-5 w-5 text-sky-500" />
+              Recent Orders
+            </CardTitle>
+            <Button variant="outline" size="sm" asChild className="font-semibold border-sky-200 text-sky-600 hover:bg-sky-50">
+              <Link href="/patient/orders">View All →</Link>
             </Button>
           </CardHeader>
           <CardContent className="p-0">
             {recentOrders.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-8 text-center">
-                <ClipboardList className="h-8 w-8 text-muted-foreground mb-2" />
-                <p className="text-sm text-muted-foreground">No recent orders</p>
+                <ClipboardList className="h-12 w-12 text-slate-300 mb-3" />
+                <p className="text-sm font-medium text-slate-500">No recent orders</p>
+                <p className="text-xs text-slate-400">Your orders will appear here</p>
               </div>
             ) : (
-              <div className="divide-y">
+              <div className="divide-y divide-slate-100">
                 {recentOrders.map((order) => (
-                  <div key={order.id} className="flex items-center justify-between px-6 py-4">
+                  <div key={order.id} className="flex items-center justify-between px-6 py-4 hover:bg-slate-50 transition-colors">
                     <div className="flex flex-col gap-1">
                       <div className="flex items-center gap-2">
-                        <span className="font-medium text-card-foreground">{order.id}</span>
+                        <span className="font-bold text-slate-800">{order.id}</span>
                         <Badge variant="secondary" className={statusColor(order.status)}>
                           {order.status}
                         </Badge>
                       </div>
-                      <span className="text-sm text-muted-foreground">
-                        {order.store} &middot; {order.items} items
+                      <span className="text-sm text-slate-500">
+                        <span className="font-semibold">{order.store}</span> &middot; {order.items} items
                       </span>
                     </div>
-                    <span className="text-sm text-muted-foreground">{order.date}</span>
+                    <span className="text-sm font-medium text-slate-500">{order.date}</span>
                   </div>
                 ))}
               </div>
@@ -189,32 +195,33 @@ export default function PatientHome() {
         </Card>
 
         {/* Notifications Panel */}
-        <Card className="border bg-card">
+        <Card className="card-elevated">
           <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2 text-lg font-semibold text-card-foreground">
-              <Bell className="h-4 w-4" />
+            <CardTitle className="flex items-center gap-2 text-lg font-bold text-slate-800">
+              <Bell className="h-5 w-5 text-amber-500" />
               Notifications
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             {notifications.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-8 text-center">
-                <Bell className="h-8 w-8 text-muted-foreground mb-2" />
-                <p className="text-sm text-muted-foreground">No notifications</p>
+                <Bell className="h-12 w-12 text-slate-300 mb-3" />
+                <p className="text-sm font-medium text-slate-500">No notifications</p>
+                <p className="text-xs text-slate-400">Updates will appear here</p>
               </div>
             ) : (
-              <div className="divide-y">
+              <div className="divide-y divide-slate-100">
                 {notifications.map((n, i) => (
                   <div key={i} className="flex items-start gap-3 px-6 py-4">
                     {n.unread && (
-                      <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-primary" />
+                      <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-sky-500" />
                     )}
                     {!n.unread && <span className="mt-1.5 h-2 w-2 shrink-0" />}
                     <div className="flex flex-col gap-1">
-                      <span className={`text-sm ${n.unread ? "font-medium text-card-foreground" : "text-muted-foreground"}`}>
+                      <span className={`text-sm ${n.unread ? "font-medium text-slate-800" : "text-slate-500"}`}>
                         {n.text}
                       </span>
-                      <span className="text-xs text-muted-foreground">{n.time}</span>
+                      <span className="text-xs text-slate-400">{n.time}</span>
                     </div>
                   </div>
                 ))}
@@ -225,44 +232,49 @@ export default function PatientHome() {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid gap-4 sm:grid-cols-3">
-        <Card className="border bg-card transition-shadow hover:shadow-md">
-          <CardContent className="flex flex-col items-center gap-3 p-6 text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
-              <Upload className="h-6 w-6 text-primary" />
-            </div>
-            <h3 className="font-semibold text-card-foreground">Upload Prescription</h3>
-            <p className="text-sm text-muted-foreground">Upload a new prescription to get started</p>
-            <Button asChild size="sm" className="mt-1">
-              <Link href="/patient/prescription">Upload Now</Link>
-            </Button>
-          </CardContent>
-        </Card>
-        <Card className="border bg-card transition-shadow hover:shadow-md">
-          <CardContent className="flex flex-col items-center gap-3 p-6 text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10">
-              <Pill className="h-6 w-6 text-accent" />
-            </div>
-            <h3 className="font-semibold text-card-foreground">Search Medicines</h3>
-            <p className="text-sm text-muted-foreground">Find medicines available at nearby stores</p>
-            <Button asChild size="sm" variant="outline" className="mt-1">
-              <Link href="/patient/medicines">Search</Link>
-            </Button>
-          </CardContent>
-        </Card>
-        <Card className="border bg-card transition-shadow hover:shadow-md">
-          <CardContent className="flex flex-col items-center gap-3 p-6 text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
-              <TrendingUp className="h-6 w-6 text-primary" />
-            </div>
-            <h3 className="font-semibold text-card-foreground">Track Orders</h3>
-            <p className="text-sm text-muted-foreground">Check the status of your current orders</p>
-            <Button asChild size="sm" variant="outline" className="mt-1">
-              <Link href="/patient/orders">View Orders</Link>
-            </Button>
-          </CardContent>
-        </Card>
+      <div>
+        <h3 className="text-lg font-bold text-slate-800 mb-4">Quick Actions</h3>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <Card className="border border-slate-100 bg-white shadow-md shadow-slate-100 transition-all hover:shadow-lg hover:shadow-violet-100 hover:-translate-y-1 hover:border-violet-200">
+            <CardContent className="flex flex-col items-center gap-3 p-6 text-center">
+              <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-violet-100">
+                <Upload className="h-7 w-7 text-violet-500" />
+              </div>
+              <h3 className="font-bold text-slate-800">Upload Prescription</h3>
+              <p className="text-sm text-slate-500">Upload a new prescription to get started</p>
+              <Button asChild size="sm" className="mt-2 font-semibold bg-violet-500 hover:bg-violet-600 shadow-md shadow-violet-200">
+                <Link href="/patient/prescription">Upload Now</Link>
+              </Button>
+            </CardContent>
+          </Card>
+          <Card className="border border-slate-100 bg-white shadow-md shadow-slate-100 transition-all hover:shadow-lg hover:shadow-emerald-100 hover:-translate-y-1 hover:border-emerald-200">
+            <CardContent className="flex flex-col items-center gap-3 p-6 text-center">
+              <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-emerald-100">
+                <Pill className="h-7 w-7 text-emerald-500" />
+              </div>
+              <h3 className="font-bold text-slate-800">Search Medicines</h3>
+              <p className="text-sm text-slate-500">Find medicines available at nearby stores</p>
+              <Button asChild size="sm" variant="outline" className="mt-2 font-semibold border-emerald-300 text-emerald-600 hover:bg-emerald-50">
+                <Link href="/patient/medicines">Search</Link>
+              </Button>
+            </CardContent>
+          </Card>
+          <Card className="border border-slate-100 bg-white shadow-md shadow-slate-100 transition-all hover:shadow-lg hover:shadow-sky-100 hover:-translate-y-1 hover:border-sky-200">
+            <CardContent className="flex flex-col items-center gap-3 p-6 text-center">
+              <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-sky-100">
+                <TrendingUp className="h-7 w-7 text-sky-500" />
+              </div>
+              <h3 className="font-bold text-slate-800">Track Orders</h3>
+              <p className="text-sm text-slate-500">Check the status of your current orders</p>
+              <Button asChild size="sm" variant="outline" className="mt-2 font-semibold border-sky-300 text-sky-600 hover:bg-sky-50">
+                <Link href="/patient/orders">View Orders</Link>
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   )
 }
+
+

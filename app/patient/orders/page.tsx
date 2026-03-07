@@ -46,18 +46,20 @@ function statusColor(status: string) {
   switch (status) {
     case "Delivered":
     case "delivered":
-      return "bg-accent/10 text-accent"
+      return "status-delivered font-bold"
     case "In Transit":
     case "in-transit":
-      return "bg-primary/10 text-primary"
     case "Processing":
     case "accepted":
-      return "bg-chart-4/10 text-chart-4"
+      return "status-accepted font-bold"
     case "Cancelled":
     case "rejected":
-      return "bg-destructive/10 text-destructive"
+      return "status-rejected font-bold"
+    case "Pending":
+    case "pending":
+      return "status-pending font-bold"
     default:
-      return "bg-muted text-muted-foreground"
+      return "bg-slate-100 text-slate-600 font-semibold"
   }
 }
 
@@ -151,7 +153,7 @@ export default function OrdersPage() {
       </div>
 
       {orders.length === 0 ? (
-        <Card className="border bg-card">
+        <Card className="card-elevated">
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Package className="h-12 w-12 text-muted-foreground mb-4" />
             <p className="font-medium text-card-foreground">No orders yet</p>
@@ -161,7 +163,7 @@ export default function OrdersPage() {
       ) : (
         <div className="flex flex-col gap-4">
           {orders.map((order) => (
-            <Card key={order.id} className="border bg-card">
+            <Card key={order.id} className="card-elevated">
               <CardHeader className="pb-3">
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                   <div className="flex items-center gap-3">
@@ -219,3 +221,5 @@ export default function OrdersPage() {
     </div>
   )
 }
+
+

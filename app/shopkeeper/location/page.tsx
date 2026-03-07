@@ -156,7 +156,7 @@ export default function LocationPage() {
 
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Map Section */}
-        <Card className="border bg-card">
+        <Card className="card-elevated">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <MapPin className="h-5 w-5" />
@@ -199,7 +199,7 @@ export default function LocationPage() {
         </Card>
 
         {/* Details Section */}
-        <Card className="border bg-card">
+        <Card className="card-elevated">
           <CardHeader>
             <CardTitle>Shop Details</CardTitle>
             <CardDescription>
@@ -263,3 +263,5 @@ export default function LocationPage() {
     </div>
   )
 }
+
+

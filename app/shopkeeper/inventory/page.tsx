@@ -277,7 +277,7 @@ export default function InventoryPage() {
         />
       </div>
 
-      <Card className="border bg-card">
+      <Card className="card-elevated">
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <Table>
@@ -340,3 +340,5 @@ export default function InventoryPage() {
     </div>
   )
 }
+
+

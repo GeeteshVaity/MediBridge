@@ -41,16 +41,18 @@ interface LowStockAlert {
 }
 
 const defaultStats: Stat[] = [
-  { label: "Pending Orders", value: "0", icon: ClipboardList, color: "text-primary" },
-  { label: "Low Stock Items", value: "0", icon: AlertTriangle, color: "text-chart-4" },
-  { label: "Prescriptions", value: "0", icon: FileText, color: "text-accent" },
-  { label: "Total Products", value: "0", icon: Package, color: "text-primary" },
+  { label: "Pending Orders", value: "0", icon: ClipboardList, color: "text-orange-500" },
+  { label: "Low Stock Items", value: "0", icon: AlertTriangle, color: "text-red-500" },
+  { label: "Prescriptions", value: "0", icon: FileText, color: "text-purple-500" },
+  { label: "Total Products", value: "0", icon: Package, color: "text-green-500" },
 ]
 
 function statusColor(status: string) {
-  if (status === "New" || status === "pending") return "bg-destructive/10 text-destructive"
-  if (status === "Accepted" || status === "accepted") return "bg-primary/10 text-primary"
-  return "bg-accent/10 text-accent"
+  if (status === "New" || status === "pending" || status === "Pending") return "status-pending font-bold"
+  if (status === "Accepted" || status === "accepted") return "status-accepted font-bold"
+  if (status === "Rejected" || status === "rejected") return "status-rejected font-bold"
+  if (status === "Delivered" || status === "delivered" || status === "Completed") return "status-delivered font-bold"
+  return "status-new font-bold"
 }
 
 export default function ShopkeeperHome() {
@@ -73,10 +75,10 @@ export default function ShopkeeperHome() {
         const data = await response.json()
         
         setStats([
-          { label: "Pending Orders", value: data.pendingOrders?.toString() || "0", icon: ClipboardList, color: "text-primary" },
-          { label: "Low Stock Items", value: data.lowStockCount?.toString() || "0", icon: AlertTriangle, color: "text-chart-4" },
-          { label: "Prescriptions", value: data.pendingPrescriptions?.toString() || "0", icon: FileText, color: "text-accent" },
-          { label: "Total Products", value: data.totalProducts?.toString() || "0", icon: Package, color: "text-primary" },
+          { label: "Pending Orders", value: data.pendingOrders?.toString() || "0", icon: ClipboardList, color: "text-orange-500" },
+          { label: "Low Stock Items", value: data.lowStockCount?.toString() || "0", icon: AlertTriangle, color: "text-red-500" },
+          { label: "Prescriptions", value: data.pendingPrescriptions?.toString() || "0", icon: FileText, color: "text-purple-500" },
+          { label: "Total Products", value: data.totalProducts?.toString() || "0", icon: Package, color: "text-green-500" },
         ])
         
         // Transform recent orders
@@ -122,22 +124,22 @@ export default function ShopkeeperHome() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h2 className="text-2xl font-bold text-foreground">Store Dashboard</h2>
-        <p className="text-muted-foreground">{shopName || "Your store"} overview and quick actions.</p>
+      <div className="bg-gradient-to-r from-emerald-100 via-teal-50 to-transparent p-5 rounded-xl border-l-4 border-emerald-400 shadow-sm">
+        <h2 className="text-2xl font-extrabold text-slate-800">Store <span className="text-emerald-500">Dashboard</span></h2>
+        <p className="text-slate-600 font-medium"><span className="font-bold">{shopName || "Your store"}</span> overview and quick actions.</p>
       </div>
 
       {/* Stats */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {stats.map((s) => (
-          <Card key={s.label} className="border bg-card">
+        {stats.map((s, index) => (
+          <Card key={s.label} className="card-elevated hover:shadow-lg hover:shadow-emerald-100/50 transition-all hover:-translate-y-1">
             <CardContent className="flex items-center gap-4 p-5">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-muted">
-                <s.icon className={`h-5 w-5 ${s.color}`} />
+              <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${index === 0 ? 'bg-amber-100' : index === 1 ? 'bg-rose-100' : index === 2 ? 'bg-violet-100' : 'bg-emerald-100'}`}>
+                <s.icon className={`h-6 w-6 ${s.color}`} />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">{s.label}</p>
-                <p className="text-2xl font-bold text-card-foreground">{s.value}</p>
+                <p className="text-sm font-medium text-slate-500">{s.label}</p>
+                <p className="text-3xl font-extrabold text-slate-800">{s.value}</p>
               </div>
             </CardContent>
           </Card>
@@ -146,38 +148,42 @@ export default function ShopkeeperHome() {
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Recent Orders */}
-        <Card className="border bg-card lg:col-span-2">
+        <Card className="card-elevated lg:col-span-2">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-lg font-semibold text-card-foreground">Recent Orders</CardTitle>
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/shopkeeper/orders">View All</Link>
+            <CardTitle className="text-lg font-bold text-slate-800 flex items-center gap-2">
+              <ClipboardList className="h-5 w-5 text-amber-500" />
+              Recent Orders
+            </CardTitle>
+            <Button variant="outline" size="sm" asChild className="font-semibold border-emerald-200 text-emerald-600 hover:bg-emerald-50">
+              <Link href="/shopkeeper/orders">View All →</Link>
             </Button>
           </CardHeader>
           <CardContent className="p-0">
             {recentOrders.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-8 text-center">
-                <ClipboardList className="h-8 w-8 text-muted-foreground mb-2" />
-                <p className="text-sm text-muted-foreground">No recent orders</p>
+                <ClipboardList className="h-12 w-12 text-slate-300 mb-3" />
+                <p className="text-sm font-medium text-slate-500">No recent orders</p>
+                <p className="text-xs text-slate-400">Orders will appear here</p>
               </div>
             ) : (
-              <div className="divide-y">
+              <div className="divide-y divide-slate-100">
                 {recentOrders.map((order) => (
-                  <div key={order.id} className="flex items-center justify-between px-6 py-4">
+                  <div key={order.id} className="flex items-center justify-between px-6 py-4 hover:bg-slate-50 transition-colors">
                     <div className="flex flex-col gap-1">
                       <div className="flex items-center gap-2">
-                        <span className="font-medium text-card-foreground">{order.id}</span>
+                        <span className="font-bold text-slate-800">{order.id}</span>
                         <Badge variant="secondary" className={statusColor(order.status)}>
                           {order.status}
                         </Badge>
                       </div>
-                      <span className="text-sm font-medium text-muted-foreground">
+                      <span className="text-sm font-semibold text-slate-600">
                         {order.medicines}
                       </span>
-                      <span className="text-xs text-muted-foreground">
-                        {order.patient} &middot; {order.items} items &middot; ₹{order.total.toFixed(2)}
+                      <span className="text-xs text-slate-500">
+                        <span className="font-medium">{order.patient}</span> &middot; {order.items} items &middot; <span className="font-bold text-emerald-500">₹{order.total.toFixed(2)}</span>
                       </span>
                     </div>
-                    <span className="text-sm text-muted-foreground">{order.date}</span>
+                    <span className="text-sm font-medium text-slate-500">{order.date}</span>
                   </div>
                 ))}
               </div>
@@ -186,30 +192,31 @@ export default function ShopkeeperHome() {
         </Card>
 
         {/* Low Stock Alerts */}
-        <Card className="border bg-card">
+        <Card className="card-elevated">
           <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2 text-lg font-semibold text-card-foreground">
-              <AlertTriangle className="h-4 w-4 text-chart-4" />
+            <CardTitle className="flex items-center gap-2 text-lg font-bold text-slate-800">
+              <AlertTriangle className="h-5 w-5 text-rose-500" />
               Low Stock Alerts
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             {lowStockAlerts.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-8 text-center">
-                <Package className="h-8 w-8 text-muted-foreground mb-2" />
-                <p className="text-sm text-muted-foreground">No low stock alerts</p>
+                <Package className="h-12 w-12 text-slate-300 mb-3" />
+                <p className="text-sm font-medium text-slate-500">No low stock alerts</p>
+                <p className="text-xs text-slate-400">All items are in stock</p>
               </div>
             ) : (
-              <div className="divide-y">
+              <div className="divide-y divide-slate-100">
                 {lowStockAlerts.map((item, i) => (
-                  <div key={i} className="flex items-center justify-between px-6 py-4">
+                  <div key={i} className="flex items-center justify-between px-6 py-4 hover:bg-slate-50 transition-colors">
                     <div className="flex flex-col gap-0.5">
-                      <span className="text-sm font-medium text-card-foreground">{item.name}</span>
-                      <span className="text-xs text-muted-foreground">
-                        Threshold: {item.threshold} units
+                      <span className="text-sm font-bold text-slate-800">{item.name}</span>
+                      <span className="text-xs text-slate-500">
+                        Threshold: <span className="font-semibold">{item.threshold}</span> units
                       </span>
                     </div>
-                    <Badge variant="secondary" className="bg-chart-4/10 text-chart-4">
+                    <Badge variant="secondary" className="bg-rose-100 text-rose-600 font-bold">
                       {item.stock} left
                     </Badge>
                   </div>
@@ -221,44 +228,49 @@ export default function ShopkeeperHome() {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid gap-4 sm:grid-cols-3">
-        <Card className="border bg-card transition-shadow hover:shadow-md">
-          <CardContent className="flex flex-col items-center gap-3 p-6 text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
-              <Package className="h-6 w-6 text-primary" />
-            </div>
-            <h3 className="font-semibold text-card-foreground">Manage Inventory</h3>
-            <p className="text-sm text-muted-foreground">Add, update or remove stock items</p>
-            <Button asChild size="sm" className="mt-1">
-              <Link href="/shopkeeper/inventory">Go to Inventory</Link>
-            </Button>
-          </CardContent>
-        </Card>
-        <Card className="border bg-card transition-shadow hover:shadow-md">
-          <CardContent className="flex flex-col items-center gap-3 p-6 text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10">
-              <ClipboardList className="h-6 w-6 text-accent" />
-            </div>
-            <h3 className="font-semibold text-card-foreground">View Orders</h3>
-            <p className="text-sm text-muted-foreground">Accept or reject incoming orders</p>
-            <Button asChild size="sm" variant="outline" className="mt-1">
-              <Link href="/shopkeeper/orders">View Orders</Link>
-            </Button>
-          </CardContent>
-        </Card>
-        <Card className="border bg-card transition-shadow hover:shadow-md">
-          <CardContent className="flex flex-col items-center gap-3 p-6 text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-chart-4/10">
-              <TrendingUp className="h-6 w-6 text-chart-4" />
-            </div>
-            <h3 className="font-semibold text-card-foreground">Restock Items</h3>
-            <p className="text-sm text-muted-foreground">Request restocking for low items</p>
-            <Button asChild size="sm" variant="outline" className="mt-1">
-              <Link href="/shopkeeper/restock">Restock</Link>
-            </Button>
-          </CardContent>
-        </Card>
+      <div>
+        <h3 className="text-lg font-bold text-slate-800 mb-4">Quick Actions</h3>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <Card className="border border-slate-100 bg-white shadow-md shadow-slate-100 transition-all hover:shadow-lg hover:shadow-emerald-100 hover:-translate-y-1 hover:border-emerald-200">
+            <CardContent className="flex flex-col items-center gap-3 p-6 text-center">
+              <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-emerald-100">
+                <Package className="h-7 w-7 text-emerald-500" />
+              </div>
+              <h3 className="font-bold text-slate-800">Manage Inventory</h3>
+              <p className="text-sm text-slate-500">Add, update or remove stock items</p>
+              <Button asChild size="sm" className="mt-2 font-semibold bg-emerald-500 hover:bg-emerald-600 shadow-md shadow-emerald-200">
+                <Link href="/shopkeeper/inventory">Go to Inventory</Link>
+              </Button>
+            </CardContent>
+          </Card>
+          <Card className="border border-slate-100 bg-white shadow-md shadow-slate-100 transition-all hover:shadow-lg hover:shadow-amber-100 hover:-translate-y-1 hover:border-amber-200">
+            <CardContent className="flex flex-col items-center gap-3 p-6 text-center">
+              <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-amber-100">
+                <ClipboardList className="h-7 w-7 text-amber-500" />
+              </div>
+              <h3 className="font-bold text-slate-800">View Orders</h3>
+              <p className="text-sm text-slate-500">Accept or reject incoming orders</p>
+              <Button asChild size="sm" variant="outline" className="mt-2 font-semibold border-amber-300 text-amber-600 hover:bg-amber-50">
+                <Link href="/shopkeeper/orders">View Orders</Link>
+              </Button>
+            </CardContent>
+          </Card>
+          <Card className="border border-slate-100 bg-white shadow-md shadow-slate-100 transition-all hover:shadow-lg hover:shadow-rose-100 hover:-translate-y-1 hover:border-rose-200">
+            <CardContent className="flex flex-col items-center gap-3 p-6 text-center">
+              <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-rose-100">
+                <TrendingUp className="h-7 w-7 text-rose-500" />
+              </div>
+              <h3 className="font-bold text-slate-800">Restock Items</h3>
+              <p className="text-sm text-slate-500">Request restocking for low items</p>
+              <Button asChild size="sm" variant="outline" className="mt-2 font-semibold border-rose-300 text-rose-600 hover:bg-rose-50">
+                <Link href="/shopkeeper/restock">Restock</Link>
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   )
 }
+
+

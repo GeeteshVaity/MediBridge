@@ -166,7 +166,7 @@ export default function StoresPage() {
       </div>
 
       {/* Interactive Map */}
-      <Card className="border bg-card overflow-hidden">
+      <Card className="card-elevated overflow-hidden">
         <div className="h-[350px]">
           <DynamicMap
             center={getMapCenter()}
@@ -193,7 +193,7 @@ export default function StoresPage() {
       )}
 
       {stores.length === 0 ? (
-        <Card className="border bg-card">
+        <Card className="card-elevated">
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Store className="h-12 w-12 text-muted-foreground mb-4" />
             <p className="font-medium text-card-foreground">No stores found nearby</p>
@@ -205,7 +205,7 @@ export default function StoresPage() {
           {stores.map((store) => (
             <Card 
               key={store.id} 
-              className={`border bg-card transition-shadow hover:shadow-md cursor-pointer ${
+              className={`card-elevated transition-shadow hover:shadow-md cursor-pointer ${
                 selectedStore === store.id ? 'ring-2 ring-primary' : ''
               }`}
               onClick={() => setSelectedStore(store.id === selectedStore ? null : store.id)}
@@ -284,3 +284,5 @@ export default function StoresPage() {
     </div>
   )
 }
+
+

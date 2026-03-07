@@ -3,7 +3,7 @@ import { connectDB } from '@/lib/mongodb';
 import Cart from '@/models/Cart';
 import mongoose from 'mongoose';
 
-export async function DELETE(request: NextRequest) {
+async function clearCartHandler(request: NextRequest) {
   try {
     await connectDB();
 
@@ -41,4 +41,13 @@ export async function DELETE(request: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+// Support both DELETE and POST for backward compatibility
+export async function DELETE(request: NextRequest) {
+  return clearCartHandler(request);
+}
+
+export async function POST(request: NextRequest) {
+  return clearCartHandler(request);
 }

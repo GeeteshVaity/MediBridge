@@ -187,7 +187,7 @@ export default function PrescriptionPage() {
       </div>
 
       {/* Upload Section */}
-      <Card className="border bg-card">
+      <Card className="card-elevated">
         <CardContent className="p-6">
           <div
             onDragOver={(e) => { e.preventDefault(); setDragOver(true) }}
@@ -254,7 +254,7 @@ export default function PrescriptionPage() {
       </Card>
 
       {/* How it works */}
-      <Card className="border bg-card">
+      <Card className="card-elevated">
         <CardHeader className="pb-3">
           <CardTitle className="text-base">How it works</CardTitle>
         </CardHeader>
@@ -287,7 +287,7 @@ export default function PrescriptionPage() {
       <div>
         <h3 className="text-lg font-semibold text-foreground mb-4">Your Prescriptions</h3>
         {prescriptions.length === 0 ? (
-          <Card className="border bg-card">
+          <Card className="card-elevated">
             <CardContent className="flex flex-col items-center justify-center py-12">
               <FileText className="h-12 w-12 text-muted-foreground mb-4" />
               <p className="font-medium text-card-foreground">No prescriptions yet</p>
@@ -297,7 +297,7 @@ export default function PrescriptionPage() {
         ) : (
           <div className="flex flex-col gap-4">
             {prescriptions.map((prescription) => (
-              <Card key={prescription._id} className="border bg-card">
+              <Card key={prescription._id} className="card-elevated">
                 <CardContent className="p-0">
                   {/* Prescription Header */}
                   <div 
@@ -322,9 +322,9 @@ export default function PrescriptionPage() {
                         <p className="text-sm text-muted-foreground">
                           {new Date(prescription.createdAt).toLocaleDateString()}
                         </p>
-                        {prescription.offersCount > 0 && prescription.status !== 'accepted' && (
+                        {prescription.offers.filter(o => o.status === 'pending').length > 0 && prescription.status !== 'accepted' && (
                           <p className="text-sm text-primary font-medium">
-                            {prescription.offersCount} offer{prescription.offersCount > 1 ? 's' : ''} received
+                            {prescription.offers.filter(o => o.status === 'pending').length} offer{prescription.offers.filter(o => o.status === 'pending').length > 1 ? 's' : ''} received
                           </p>
                         )}
                       </div>
@@ -380,7 +380,7 @@ export default function PrescriptionPage() {
                             </div>
                           ))}
                         </div>
-                      ) : prescription.offers.length === 0 ? (
+                      ) : prescription.offers.filter(o => o.status === 'pending').length === 0 ? (
                         <div className="flex flex-col items-center py-8 text-center">
                           <Clock className="h-10 w-10 text-muted-foreground mb-3" />
                           <p className="font-medium text-card-foreground">Waiting for offers</p>
@@ -393,7 +393,7 @@ export default function PrescriptionPage() {
                           <p className="text-sm font-medium text-muted-foreground">
                             Compare offers and choose the best one:
                           </p>
-                          {prescription.offers.map((offer) => (
+                          {prescription.offers.filter(o => o.status === 'pending').map((offer) => (
                             <div 
                               key={offer._id} 
                               className="border rounded-lg p-4 hover:border-primary transition-colors"
@@ -462,3 +462,5 @@ export default function PrescriptionPage() {
     </div>
   )
 }
+
+

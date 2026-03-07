@@ -81,10 +81,9 @@ export async function POST(request: NextRequest) {
       status: 'pending',
     });
 
-    // Update prescription status
+    // Update prescription status using findByIdAndUpdate to avoid validation issues
     if (prescription.status === 'pending') {
-      prescription.status = 'offers-received';
-      await prescription.save();
+      await Prescription.findByIdAndUpdate(prescriptionId, { status: 'offers-received' });
     }
 
     // Notify the patient

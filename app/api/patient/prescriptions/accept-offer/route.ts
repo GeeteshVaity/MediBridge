@@ -84,15 +84,24 @@ export async function POST(request: NextRequest) {
     });
 
     // Update the offer status
-    offer.status = 'accepted';
-    await offer.save();
+    await PrescriptionOffer.findByIdAndUpdate(offerId, { status: 'accepted' });
 
-    // Update prescription status
-    prescription.status = 'accepted';
-    prescription.acceptedOfferId = offer._id;
-    await prescription.save();
+    // Update prescription status using findByIdAndUpdate to avoid validation issues
+    await Prescription.findByIdAndUpdate(
+      prescription._id,
+      { 
+        status: 'accepted',
+        acceptedOfferId: offer._id 
+      }
+    );
 
     // Reject all other offers for this prescription
+    const rejectedOffers = await PrescriptionOffer.find({
+      prescriptionId: prescription._id,
+      _id: { $ne: offerId },
+      status: 'pending'
+    });
+
     await PrescriptionOffer.updateMany(
       { 
         prescriptionId: prescription._id, 
@@ -102,30 +111,29 @@ export async function POST(request: NextRequest) {
       { status: 'rejected' }
     );
 
-    // Notify the shop
+    const prescriptionCode = `RX-${prescription._id.toString().slice(-6).toUpperCase()}`;
+
+    // Notify the accepted shop
     await Notification.create({
       userId: offer.shopId,
-      type: 'order',
-      title: 'Offer Accepted!',
-      message: `Your offer for prescription has been accepted. Order total: ₹${(offer.totalAmount + offer.deliveryFee).toFixed(2)}`,
+      type: 'prescription',
+      title: '🎉 Offer Accepted!',
+      message: `Great news! Your offer of ₹${(offer.totalAmount + offer.deliveryFee).toFixed(2)} for prescription ${prescriptionCode} has been accepted by the patient. Please prepare the order.`,
       read: false,
+      relatedPrescriptionId: prescription._id,
     });
 
-    // Notify rejected shops
-    const rejectedOffers = await PrescriptionOffer.find({
-      prescriptionId: prescription._id,
-      _id: { $ne: offerId },
-    });
+    // Notify rejected shops with detailed messages
+    if (rejectedOffers.length > 0) {
+      const rejectionNotifications = rejectedOffers.map((o) => ({
+        userId: o.shopId,
+        type: 'prescription',
+        title: 'Offer Not Selected',
+        message: `The patient has selected another offer for prescription ${prescriptionCode}. Your offer of ₹${(o.totalAmount + o.deliveryFee).toFixed(2)} was not selected this time.`,
+        read: false,
+        relatedPrescriptionId: prescription._id,
+      }));
 
-    const rejectionNotifications = rejectedOffers.map((o) => ({
-      userId: o.shopId,
-      type: 'order',
-      title: 'Offer Not Selected',
-      message: `Another shop's offer was selected for prescription #${prescription._id.toString().slice(-6).toUpperCase()}`,
-      read: false,
-    }));
-
-    if (rejectionNotifications.length > 0) {
       await Notification.insertMany(rejectionNotifications);
     }
 

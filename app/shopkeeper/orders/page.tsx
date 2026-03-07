@@ -197,7 +197,7 @@ export default function IncomingOrdersPage() {
             {pending.map((order) => (
               <Card
                 key={order.id}
-                className={`border bg-card ${
+                className={`card-elevated ${
                   order.timeLeft <= 60 ? "border-destructive/30" : ""
                 }`}
               >
@@ -269,20 +269,20 @@ export default function IncomingOrdersPage() {
           </h3>
           <div className="flex flex-col gap-3">
             {resolved.map((order) => (
-              <Card key={order.id} className="border bg-card">
+              <Card key={order.id} className="card-elevated">
                 <CardContent className="flex items-center justify-between p-5">
                   <div className="flex items-center gap-4">
                     <div
                       className={`flex h-10 w-10 items-center justify-center rounded-lg ${
                         order.status === "Accepted"
-                          ? "bg-accent/10"
-                          : "bg-destructive/10"
+                          ? "bg-emerald-100"
+                          : "bg-rose-100"
                       }`}
                     >
                       {order.status === "Accepted" ? (
-                        <CheckCircle2 className="h-5 w-5 text-accent" />
+                        <CheckCircle2 className="h-5 w-5 text-emerald-600" />
                       ) : (
-                        <XCircle className="h-5 w-5 text-destructive" />
+                        <XCircle className="h-5 w-5 text-rose-600" />
                       )}
                     </div>
                     <div>
@@ -299,8 +299,8 @@ export default function IncomingOrdersPage() {
                     variant="secondary"
                     className={
                       order.status === "Accepted"
-                        ? "bg-accent/10 text-accent"
-                        : "bg-destructive/10 text-destructive"
+                        ? "status-accepted font-bold"
+                        : "status-rejected font-bold"
                     }
                   >
                     {order.status}
@@ -313,7 +313,7 @@ export default function IncomingOrdersPage() {
       )}
 
       {pending.length === 0 && resolved.length === 0 && (
-        <Card className="border bg-card">
+        <Card className="card-elevated">
           <CardContent className="flex flex-col items-center gap-2 py-12">
             <Package className="h-8 w-8 text-muted-foreground" />
             <p className="font-medium text-card-foreground">No orders yet</p>
@@ -324,3 +324,5 @@ export default function IncomingOrdersPage() {
     </div>
   )
 }
+
+

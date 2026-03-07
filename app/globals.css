@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Scale content by 25% for better visibility */
+html {
+  font-size: 125%; /* 16px * 1.25 = 20px base font size */
+}
+
 body {
   font-family: Arial, Helvetica, sans-serif;
 }
@@ -14,39 +19,39 @@ body {
 
 @layer base {
   :root {
-    --background: 210 40% 98%;
-    --foreground: 210 40% 11%;
+    --background: 180 30% 99%;
+    --foreground: 210 40% 15%;
     --card: 0 0% 100%;
-    --card-foreground: 210 40% 11%;
+    --card-foreground: 210 40% 15%;
     --popover: 0 0% 100%;
-    --popover-foreground: 210 40% 11%;
-    --primary: 210 80% 50%;
+    --popover-foreground: 210 40% 15%;
+    --primary: 210 90% 55%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 152 44% 94%;
-    --secondary-foreground: 152 44% 18%;
-    --muted: 210 20% 95%;
-    --muted-foreground: 210 10% 45%;
-    --accent: 152 44% 49%;
+    --secondary: 168 60% 96%;
+    --secondary-foreground: 168 60% 20%;
+    --muted: 180 25% 96%;
+    --muted-foreground: 210 15% 40%;
+    --accent: 168 70% 42%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 210 20% 90%;
-    --input: 210 20% 90%;
-    --ring: 210 80% 50%;
-    --chart-1: 210 80% 50%;
-    --chart-2: 152 44% 49%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
+    --border: 180 25% 90%;
+    --input: 180 25% 92%;
+    --ring: 210 90% 55%;
+    --chart-1: 210 90% 55%;
+    --chart-2: 168 70% 42%;
+    --chart-3: 197 40% 30%;
+    --chart-4: 43 80% 60%;
+    --chart-5: 27 90% 60%;
     --radius: 0.625rem;
     --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 210 40% 20%;
-    --sidebar-primary: 210 80% 50%;
+    --sidebar-primary: 210 90% 55%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 210 40% 96%;
+    --sidebar-accent: 180 40% 97%;
     --sidebar-accent-foreground: 210 40% 20%;
-    --sidebar-border: 210 20% 92%;
-    --sidebar-ring: 210 80% 50%;
+    --sidebar-border: 180 25% 92%;
+    --sidebar-ring: 210 90% 55%;
   }
 }
 
@@ -57,4 +62,123 @@ body {
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Healthcare gradient backgrounds */
+.healthcare-gradient {
+  background: linear-gradient(135deg, #e0f7fa 0%, #e8f5e9 50%, #fff3e0 100%);
+}
+
+/* Animated gradient for hero sections - bright & cheerful */
+.animated-gradient {
+  background: linear-gradient(-45deg, 
+    #f0fdf4, /* mint green */
+    #ecfeff, /* cyan */
+    #f0f9ff, /* sky blue */
+    #fef3c7, /* warm yellow */
+    #fdf4ff  /* soft pink */
+  );
+  background-size: 400% 400%;
+  animation: gradient 20s ease infinite;
+}
+
+@keyframes gradient {
+  0% { background-position: 0% 50%; }
+  25% { background-position: 50% 100%; }
+  50% { background-position: 100% 50%; }
+  75% { background-position: 50% 0%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Subtle pattern overlay */
+.pattern-dots {
+  background-image: radial-gradient(circle, rgba(0,0,0,0.03) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* Glassmorphism cards - bright and airy */
+.glass-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+}
+
+/* Soft floating orbs for background */
+.orb-blue { background: linear-gradient(135deg, rgba(147, 197, 253, 0.5), rgba(191, 219, 254, 0.3)); }
+.orb-green { background: linear-gradient(135deg, rgba(134, 239, 172, 0.5), rgba(187, 247, 208, 0.3)); }
+.orb-yellow { background: linear-gradient(135deg, rgba(253, 224, 71, 0.4), rgba(254, 240, 138, 0.3)); }
+.orb-pink { background: linear-gradient(135deg, rgba(249, 168, 212, 0.4), rgba(251, 207, 232, 0.3)); }
+.orb-teal { background: linear-gradient(135deg, rgba(94, 234, 212, 0.4), rgba(153, 246, 228, 0.3)); }
+
+/* Icon gradient backgrounds */
+.icon-gradient-blue {
+  background: linear-gradient(135deg, #3b82f6, #06b6d4);
+}
+
+.icon-gradient-green {
+  background: linear-gradient(135deg, #10b981, #34d399);
+}
+
+.icon-gradient-orange {
+  background: linear-gradient(135deg, #f97316, #fbbf24);
+}
+
+.icon-gradient-purple {
+  background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+}
+
+.icon-gradient-pink {
+  background: linear-gradient(135deg, #ec4899, #f472b6);
+}
+
+.icon-gradient-teal {
+  background: linear-gradient(135deg, #14b8a6, #5eead4);
+}
+
+.icon-gradient-red {
+  background: linear-gradient(135deg, #ef4444, #f87171);
+}
+
+/* Card base styles - light cream/off-white background to differentiate from pure white base */
+.card-base {
+  background: linear-gradient(135deg, #fefefe 0%, #faf9f7 100%);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.card-elevated {
+  background: linear-gradient(145deg, #ffffff 0%, #f8f9fc 100%);
+  border: 1px solid rgba(100, 116, 139, 0.12);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04), 0 4px 16px rgba(0, 0, 0, 0.02);
+}
+
+/* Status badge styles - clear and defined */
+.status-pending {
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  color: #b45309;
+  border: 1px solid rgba(217, 119, 6, 0.2);
+}
+
+.status-accepted, .status-in-transit {
+  background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+  color: #15803d;
+  border: 1px solid rgba(22, 163, 74, 0.2);
+}
+
+.status-delivered, .status-completed {
+  background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+  color: #047857;
+  border: 1px solid rgba(5, 150, 105, 0.25);
+}
+
+.status-rejected, .status-cancelled {
+  background: linear-gradient(135deg, #fee2e2, #fecaca);
+  color: #b91c1c;
+  border: 1px solid rgba(220, 38, 38, 0.2);
+}
+
+.status-new {
+  background: linear-gradient(135deg, #e0f2fe, #bae6fd);
+  color: #0369a1;
+  border: 1px solid rgba(14, 165, 233, 0.2);
 }
